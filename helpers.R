@@ -91,6 +91,20 @@ create.folds <- function(num.folds, num.rows)
   return(folds)
 }
 
+get.model <- function(train)
+{
+  m <- multinom(Category ~ DayOfWeek + X + Y + WoY + DoM + Month + Year + Hour,
+                data = train,
+                entropy = TRUE)
+
+  return(m)
+}
+
+get.preds <- function(model, input.data)
+{
+  predict(model, newdata = input.data, type = "probs")
+}
+
 # run one fold of cross-validation
 cv.fold <- function(fold, train)
 {
@@ -105,11 +119,9 @@ cv.fold <- function(fold, train)
   cv.test.rows <- which(cv.test$Category %in% categories)
   cv.test <- cv.test[cv.test.rows,]
 
-  m <- multinom(Category ~ DayOfWeek + X + Y + WoY + DoM + Month + Year + Hour,
-                data = cv.train,
-                entropy = TRUE)
+  m <- get.model(cv.train)
 
-  pred <- predict(m, newdata = cv.test, type = "probs")
+  pred <- get.preds(m, cv.test)
 
   mll <- mult.log.loss(pred, cv.test)
 
