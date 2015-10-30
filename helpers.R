@@ -133,7 +133,7 @@ run.sample <- function(iter, train)
 {
   print(paste("Now on sample", iter))
 
-  train <- sample.train(train)
+  train <- incl.sample(train)
   train <- build.model(train)
 
   folds <- create.folds(5, nrow(train))
