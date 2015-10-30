@@ -1,0 +1,6 @@
+.RData
+.Rhistory
+data/
+mlogit_example.R
+.Rproj.user
+sf_crime.Rproj
