@@ -150,3 +150,19 @@ run.samples <- function(train, num.samples = 10)
   sample.scores <- sapply(1:num.samples, run.sample, train)
   return(mean(sample.scores))
 }
+
+# generate a submission file
+generate.subm <- function(train, test)
+{
+  test <- build.model(test)
+  train <- build.model(train)
+
+  train.sample <- incl.sample(train)
+  m <- get.model(train.sample)
+  preds <- as.data.frame(get.preds(m, test))
+
+  id.df <- data.frame(Id = test[,"Id"])
+
+  output.df <- cbind(id.df, preds)
+  write.csv(output.df, "submission.csv", row.names = FALSE)
+}
