@@ -38,6 +38,35 @@ sample.train <- function(train, n = 10000)
   return(smpl)
 }
 
+# get an "inclusive sample"
+# i.e., get a sample of train such that at least one example is included
+# for each kind of class label
+incl.sample <- function(train, n = 10000)
+{
+  categories <- unique(as.character(train$Category))
+
+  find.row <- function(category, train) {
+    indices <- which(train$Category == category)
+    index <- sample(indices, 1)
+    return(index)
+  }
+
+  # to begin with, get a sample consisting of one row for each category
+  first.sample <- sapply(categories, find.row, train)
+
+  # then sample the rest of the data in order to obtain the desired total sample size
+  remaining.indices <- 1:nrow(train)
+  remaining.indices <- remaining.indices[!(remaining.indices %in% first.sample)]
+  second.sample.size <- n - length(first.sample)
+  second.sample <- sample(remaining.indices, second.sample.size)
+
+  combined.sample <- c(first.sample, second.sample)
+
+  output <- train[combined.sample,]
+
+  return(output)
+}
+
 # assign each row to a fold for cross-validation
 # (using only the row indices, not the data itself)
 create.folds <- function(num.folds, num.rows)
