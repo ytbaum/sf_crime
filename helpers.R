@@ -25,6 +25,9 @@ build.model <- function(train)
   train$Year <- as.integer(strftime(train$Dates, "%Y")) - 2000
   train$Hour <- as.integer(strftime(train$Dates, "%H"))
 
+  day.num <- sapply(train$DayOfWeek, day.to.num)
+  train$DayOfWeek <- day.num
+
   return(train)
 }
 
@@ -282,4 +285,22 @@ get.current.commit <- function()
   commit.hash <- gsub("\n", "", commit.hash)
 
   return(commit.hash)
+}
+
+### Data-munging functions
+
+# convert "day of week" values ("Sunday", "Monday", etc.) to numbers 1-7
+day.to.num <- function(day)
+{
+  day.numbers <- c(Sunday = 1,
+                   Monday = 2,
+                   Tuesday = 3,
+                   Wednesday = 4,
+                   Thursday = 5,
+                   Friday = 6,
+                   Saturday = 7)
+
+  output <- day.numbers[day]
+
+  return(output)
 }
