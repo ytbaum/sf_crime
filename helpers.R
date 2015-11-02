@@ -28,6 +28,13 @@ build.model <- function(train)
   day.num <- sapply(train$DayOfWeek, day.to.num)
   train$DayOfWeek <- day.num
 
+  PdDistrict <- as.character(train$PdDistrict)
+  PdDistrict.mat <- model.matrix( ~ PdDistrict - 1, train)
+
+  train <- train[,c("Category", "X", "Y", "DayOfWeek",
+                    "WoY", "DoM", "Month", "Year", "Hour")]
+  train <- cbind(train, as.data.frame(PdDistrict.mat))
+
   return(train)
 }
 
@@ -97,7 +104,11 @@ create.folds <- function(num.folds, num.rows)
 get.model <- function(train)
 {
   require(nnet)
-  m <- multinom(Category ~ DayOfWeek + X + Y + WoY + DoM + Month + Year + Hour,
+  m <- multinom(Category ~ DayOfWeek + X + Y + WoY + DoM + Month + Year + Hour
+                + PdDistrictNORTHERN + PdDistrictPARK + PdDistrictINGLESIDE
+                + PdDistrictBAYVIEW + PdDistrictRICHMOND + PdDistrictCENTRAL
+                + PdDistrictTARAVAL + PdDistrictTENDERLOIN + PdDistrictMISSION
+                + PdDistrictSOUTHERN,
                 data = train,
                 entropy = TRUE)
 
