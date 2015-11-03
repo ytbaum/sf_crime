@@ -154,17 +154,132 @@ run.samples <- function(train, num.samples = 10)
 }
 
 # generate a submission file
-generate.subm <- function(train, test)
+# train: the data to train on
+# test: the target data to be classified
+# subm.name: the name of this submission (a short name to describe it)
+generate.subm <- function(train, test, subm.name)
 {
+  require(logging)
+
+  init.subm.dir(subm.name)
+  addHandler(writeToFile,
+             file = get.log.file(subm.name),
+             level = 'INFO')
+
+  loginfo(paste("Current HEAD ref:", get.head.ref()))
+  loginfo(paste("Current commit:", get.current.commit()))
+
   test <- build.model(test)
   train <- build.model(train)
 
   train.sample <- incl.sample(train)
+  save.sample(train.sample, subm.name)
   m <- get.model(train.sample)
+  loginfo("The call used to train the model:")
+  loginfo(m$call)
+
   preds <- as.data.frame(get.preds(m, test))
 
   id.df <- data.frame(Id = test[,"Id"])
 
   output.df <- cbind(id.df, preds)
-  write.csv(output.df, "submission.csv", row.names = FALSE)
+
+  write.csv(output.df, get.subm.file(subm.name), row.names = FALSE)
+  zip.subm.file(subm.name)
+}
+
+# takes the name of a submission as an argument, and returns the corresponding
+# directory path
+get.subm.dir.name <- function(subm.name)
+{
+  proj.root <- getwd()
+  subm.dir <- paste(proj.root, "submissions", subm.name, sep = "/")
+  return(subm.dir)
+}
+
+# make a new directory for a given submission
+make.subm.dir <- function(subm.name)
+{
+  new.dir <- get.subm.dir.name(subm.name)
+  dir.create(new.dir, recursive = TRUE)
+}
+
+# initialize the directory for a given submission
+init.subm.dir <- function(subm.name)
+{
+  subm.dir <- get.subm.dir.name(subm.name)
+  if (dir.exists(subm.dir)) {
+    unlink(subm.dir, recursive = TRUE)
+  }
+
+  make.subm.dir(subm.name)
+}
+
+# takes the name of a submission as an argument, and returns the log file for
+# that submission
+get.log.file <- function(subm.name)
+{
+  subm.dir <- get.subm.dir.name(subm.name)
+  log.file <- paste(subm.dir, "log.txt", sep = "/")
+  return(log.file)
+}
+
+# takes the name of a submission as an argument, and returns the name of the file
+# containing the list of rows comprising the sample of training data used to 
+# train the model
+get.sample.file <- function(subm.name)
+{
+  subm.dir <- get.subm.dir.name(subm.name)
+  sample.file <- paste(subm.dir, "sample.txt", sep = "/")
+  return(sample.file)
+}
+
+# based on the submission name, return the absolute path of the submission file
+get.subm.file <- function(subm.name)
+{
+  subm.dir <- get.subm.dir.name(subm.name)
+  subm.file <- paste(subm.dir, "submission.csv", sep = "/")
+  return(subm.file)
+}
+
+# zip the submission file for submission to kaggle
+zip.subm.file <- function(subm.name)
+{
+  subm.dir <- get.subm.dir.name(subm.name)
+  subm.file <- paste(subm.dir, "submission.csv", sep = "/")
+  zip.file <- paste(subm.dir, "submission.zip", sep = "/")
+  zip(zip.file, subm.file)
+}
+
+# store the rows that make up a sample of a given data set
+# data.sample: the sample whose row indices we want to record
+# subm.name: the name of the submission that this sample is being used for
+save.sample <- function(data.sample, subm.name)
+{
+  sample.file <- get.sample.file(subm.name)
+  sample.indices <- as.numeric(rownames(data.sample))
+  write(sample.indices, file = sample.file, sep = "\n")
+}
+
+# get the current ref that the HEAD branch is pointing to in git
+get.head.ref <- function()
+{
+  proj.root <- getwd()
+  head.file <- paste(proj.root, ".git", "HEAD", sep = "/")
+  head.ref.str <- readChar(head.file, file.info(head.file)$size)
+  head.ref <- unlist(strsplit(readChar(".git/HEAD", file.info(".git/HEAD")$size), " "))[2]
+  head.ref <- gsub("\n", "", head.ref)
+
+  return(head.ref)
+}
+
+# get the current commit that HEAD is pointing to in git
+get.current.commit <- function()
+{
+  proj.root <- getwd()
+  ref.file <- paste(proj.root, ".git", get.head.ref(), sep = "/")
+  commit.hash <- readChar(ref.file, file.info(ref.file)$size)
+  commit.hash <- gsub("\n", "", commit.hash)
+
+  return(commit.hash)
 }
