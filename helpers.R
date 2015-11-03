@@ -17,25 +17,30 @@ mult.log.loss <- function(pred, raw.data)
 }
 
 # do all the prep work to prep data for training and prediction
-build.model <- function(train)
+build.model <- function(data, mode = 'train')
 {
-  train$WoY <- as.integer(strftime(train$Dates, "%W"))
-  train$DoM <- as.integer(strftime(train$Dates, "%d"))
-  train$Month <- as.integer(strftime(train$Dates, "%m"))
-  train$Year <- as.integer(strftime(train$Dates, "%Y")) - 2000
-  train$Hour <- as.integer(strftime(train$Dates, "%H"))
+  data$WoY <- as.integer(strftime(data$Dates, "%W"))
+  data$DoM <- as.integer(strftime(data$Dates, "%d"))
+  data$Month <- as.integer(strftime(data$Dates, "%m"))
+  data$Year <- as.integer(strftime(data$Dates, "%Y")) - 2000
+  data$Hour <- as.integer(strftime(data$Dates, "%H"))
 
-  day.num <- sapply(train$DayOfWeek, day.to.num)
-  train$DayOfWeek <- day.num
+  day.num <- sapply(data$DayOfWeek, day.to.num)
+  data$DayOfWeek <- day.num
 
-  PdDistrict <- as.character(train$PdDistrict)
-  PdDistrict.mat <- model.matrix( ~ PdDistrict - 1, train)
+  PdDistrict <- as.character(data$PdDistrict)
+  PdDistrict.mat <- model.matrix( ~ PdDistrict - 1, data)
 
-  train <- train[,c("Category", "X", "Y", "DayOfWeek",
-                    "WoY", "DoM", "Month", "Year", "Hour")]
-  train <- cbind(train, as.data.frame(PdDistrict.mat))
+  columns.to.keep <- c("Category", "X", "Y", "DayOfWeek", "WoY", "DoM", "Month", "Year", "Hour")
+  if (mode == 'test') {
+    columns.to.keep <- columns.to.keep[columns.to.keep != "Category"]
+    columns.to.keep <- c("Id", columns.to.keep)
+  }
 
-  return(train)
+  data <- data[,columns.to.keep]
+  data <- cbind(data, as.data.frame(PdDistrict.mat))
+
+  return(data)
 }
 
 # grab a small sample of the training data
@@ -183,7 +188,7 @@ generate.subm <- function(train, test, subm.name)
   loginfo(paste("Current HEAD ref:", get.head.ref()))
   loginfo(paste("Current commit:", get.current.commit()))
 
-  test <- build.model(test)
+  test <- build.model(test, 'test')
   train <- build.model(train)
 
   train.sample <- incl.sample(train)
