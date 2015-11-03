@@ -93,6 +93,7 @@ create.folds <- function(num.folds, num.rows)
 
 get.model <- function(train)
 {
+  require(nnet)
   m <- multinom(Category ~ DayOfWeek + X + Y + WoY + DoM + Month + Year + Hour,
                 data = train,
                 entropy = TRUE)
@@ -102,6 +103,7 @@ get.model <- function(train)
 
 get.preds <- function(model, input.data)
 {
+  require(nnet)
   predict(model, newdata = input.data, type = "probs")
 }
 
