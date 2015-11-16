@@ -80,7 +80,7 @@ get.category.grid <- function(category, data, num.x.buckets = 10, num.y.buckets 
 {
   category.rows <- which(data$Category == category)
   data <- data[category.rows,]
-  grid <- get.loc.matrix(train$X, train$Y, num.x.buckets, num.y.buckets)
+  grid <- get.loc.matrix(data$X, data$Y, num.x.buckets, num.y.buckets)
   grid <- smooth.grid(grid)
 
   grid
@@ -123,7 +123,7 @@ bayes.loc.pred <- function(m, x, y)
 
   get.prob <- function(category, prior, grids) {
     prior.prob <- prior[category]
-    grid <- grids$category
+    grid <- grids[[category]]
     cond.prob <- grid[y.bucket, x.bucket]
 
     return(prior.prob * cond.prob)
