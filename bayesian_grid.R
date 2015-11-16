@@ -76,7 +76,7 @@ grid.prob <- function(x, y, grid)
   return(grid[x.bucket, y.bucket])
 }
 
-get.category.grid <- function(category, data, num.x.buckets = 20, num.y.buckets = num.x.buckets)
+get.category.grid <- function(category, data, num.x.buckets = 10, num.y.buckets = num.x.buckets)
 {
   category.rows <- which(data$Category == category)
   data <- data[category.rows,]
