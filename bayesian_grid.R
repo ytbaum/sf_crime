@@ -149,13 +149,13 @@ bayes.loc.pred <- function(m, x, y)
 {
   logdebug("bayes.loc.pred")
 
-  x.bucket <- bucket.coords(x, min.x, max.x, num.buckets = 10)
-  y.bucket <- bucket.coords(y, min.y, max.y, num.buckets = 10)
-
   grids <- m$grids
   master.grid <- m$master.grid
   prior <- m$prior
   categories <- names(prior)
+
+  x.bucket <- bucket.coords(x, min.x, max.x, ncol(master.grid))
+  y.bucket <- bucket.coords(y, min.y, max.y, nrow(master.grid))
 
   get.prob <- function(category, prior, grids, master.grid) {
     prior.prob <- prior[category]
