@@ -87,6 +87,17 @@ grid.prob <- function(x, y, grid)
   return(grid[x.bucket, y.bucket])
 }
 
+# get the grid showing probability of a crime happening in a given grid sector
+get.master.grid <- function(data, num.x.buckets = 10, num.y.buckets = num.x.buckets)
+{
+  loginfo("in get.master.grid")
+
+  grid <- get.loc.matrix(data$X, data$Y, num.x.buckets, num.y.buckets)
+  grid <- smooth.grid(grid)
+
+  grid
+}
+
 # get the grid showing probability of a crime happening in a certain grid sector, given that
 # the crime is of the provided category
 get.category.grid <- function(category, data, num.x.buckets = 10, num.y.buckets = num.x.buckets)
@@ -127,9 +138,10 @@ bayes.loc.model <- function(data)
   loginfo("bayes.loc.model")
 
   grids <- get.category.grids(data)
+  master.grid <- get.master.grid(data)
   prior <- smooth.grid(category.raw.cts(data))
 
-  return(list(grids = grids, prior = prior))
+  return(list(grids = grids, master.grid = master.grid, prior = prior))
 }
 
 # get a prediction for a single row using bayesian location model
@@ -141,18 +153,22 @@ bayes.loc.pred <- function(m, x, y)
   y.bucket <- bucket.coords(y, min.y, max.y, num.buckets = 10)
 
   grids <- m$grids
+  master.grid <- m$master.grid
   prior <- m$prior
   categories <- names(prior)
 
-  get.prob <- function(category, prior, grids) {
+  get.prob <- function(category, prior, grids, master.grid) {
     prior.prob <- prior[category]
     grid <- grids[[category]]
     cond.prob <- grid[y.bucket, x.bucket]
+    loc.prob <- master.grid[y.bucket, x.bucket]
 
-    return(prior.prob * cond.prob)
+    output <- prior.prob * cond.prob / loc.prob
+    names(output) <- NULL
+    return(output)
   }
 
-  probs <- sapply(categories, get.prob, prior, grids)
+  probs <- sapply(categories, get.prob, prior, grids, master.grid)
 
   return(probs)
 }
