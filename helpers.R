@@ -144,9 +144,9 @@ cv.fold <- function(fold, train)
   cv.test.rows <- which(cv.test$Category %in% categories)
   cv.test <- cv.test[cv.test.rows,]
 
-  m <- get.model(cv.train)
+  m <- bayes.loc.model(cv.train, 3, 3)
 
-  pred <- get.preds(m, cv.test)
+  pred <- get.bayes.preds(m, cv.test)
 
   mll <- mult.log.loss(pred, cv.test)
 
