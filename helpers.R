@@ -132,7 +132,7 @@ get.preds <- function(model, input.data)
 # run one fold of cross-validation
 cv.fold <- function(fold, train)
 {
-  loginfo("in cv.fold")
+  logdebug("in cv.fold")
   train.indices <- fold$train
   test.indices <- fold$test
 

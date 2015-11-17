@@ -14,7 +14,7 @@ max.y <- 37.82062
 # bayesian classifier
 bucket.coords <- function(v, min.v, max.v, num.buckets = 10)
 {
-  loginfo("in bucket.coords")
+  logdebug("in bucket.coords")
   # translate coordinates so they start at 0
   # round to the nearest 1/10000 because otherwise rounding errors mess things up
   v <- round(v - min.v, digits = 4)
@@ -38,7 +38,7 @@ bucket.coords <- function(v, min.v, max.v, num.buckets = 10)
 # create initial grid of all zeroes
 zeroes.grid <- function(num.rows, num.columns)
 {
-  loginfo("in zeroes.grid")
+  logdebug("in zeroes.grid")
 
   output <- matrix(data = rep.int(0, num.rows * num.columns), num.rows, num.columns)
   return(output)
@@ -48,7 +48,7 @@ zeroes.grid <- function(num.rows, num.columns)
 # of pairs of coordinates that were within that square
 get.loc.matrix <- function(x, y, num.x.buckets = 10, num.y.buckets = num.x.buckets)
 {
-  loginfo("in get.loc.matrix")
+  logdebug("in get.loc.matrix")
 
   x.buckets <- bucket.coords(x, min.x, max.x, num.x.buckets)
   y.buckets <- bucket.coords(y, min.y, max.y, num.y.buckets)
@@ -64,7 +64,7 @@ get.loc.matrix <- function(x, y, num.x.buckets = 10, num.y.buckets = num.x.bucke
 # just so that there is no place in the grid where probability = 0
 smooth.grid <- function(grid, reserve = 0.0001)
 {
-  loginfo("in smooth.grid")
+  logdebug("in smooth.grid")
 
   reduction.factor <- 1 - reserve
   zero.indices <- which(grid == 0)
@@ -80,7 +80,7 @@ smooth.grid <- function(grid, reserve = 0.0001)
 # distribution represented by this grid
 grid.prob <- function(x, y, grid)
 {
-  loginfo("in grid.prob")
+  logdebug("in grid.prob")
 
   x.bucket <- bucket.coords(x, min.x, max.x, ncol(grid))
   y.bucket <- bucket.coords(y, min.y, max.y, nrow(grid))
@@ -90,7 +90,7 @@ grid.prob <- function(x, y, grid)
 # get the grid showing probability of a crime happening in a given grid sector
 get.master.grid <- function(data, num.x.buckets = 10, num.y.buckets = num.x.buckets)
 {
-  loginfo("in get.master.grid")
+  logdebug("in get.master.grid")
 
   grid <- get.loc.matrix(data$X, data$Y, num.x.buckets, num.y.buckets)
   grid <- smooth.grid(grid)
@@ -102,7 +102,7 @@ get.master.grid <- function(data, num.x.buckets = 10, num.y.buckets = num.x.buck
 # the crime is of the provided category
 get.category.grid <- function(category, data, num.x.buckets = 10, num.y.buckets = num.x.buckets)
 {
-  loginfo("in get.category.grid")
+  logdebug("in get.category.grid")
 
   category.rows <- which(data$Category == category)
   data <- data[category.rows,]
@@ -114,7 +114,7 @@ get.category.grid <- function(category, data, num.x.buckets = 10, num.y.buckets 
 
 get.category.grids <- function(data, num.x.buckets = 10, num.y.buckets = num.x.buckets)
 {
-  loginfo("get.category.grids")
+  logdebug("get.category.grids")
 
   categories <- as.character(unique(data$Category))
   names(categories) <- categories # hack to retain category names as indices into list
@@ -125,7 +125,7 @@ get.category.grids <- function(data, num.x.buckets = 10, num.y.buckets = num.x.b
 
 category.raw.cts <- function(data)
 {
-  loginfo("category.raw.cts")
+  logdebug("category.raw.cts")
 
   categories <- as.character(data$Category)
   prior <- table(categories)
@@ -135,7 +135,7 @@ category.raw.cts <- function(data)
 # get the whole bayesian location model
 bayes.loc.model <- function(data)
 {
-  loginfo("bayes.loc.model")
+  logdebug("bayes.loc.model")
 
   grids <- get.category.grids(data)
   master.grid <- get.master.grid(data)
@@ -147,7 +147,7 @@ bayes.loc.model <- function(data)
 # get a prediction for a single row using bayesian location model
 bayes.loc.pred <- function(m, x, y)
 {
-  loginfo("bayes.loc.pred")
+  logdebug("bayes.loc.pred")
 
   x.bucket <- bucket.coords(x, min.x, max.x, num.buckets = 10)
   y.bucket <- bucket.coords(y, min.y, max.y, num.buckets = 10)
