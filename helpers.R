@@ -156,7 +156,7 @@ cv.fold <- function(fold, train)
 # run cross-validation over a small sample of training data
 run.sample <- function(iter, train)
 {
-  print(paste("Now on sample", iter))
+  loginfo(paste("Now on sample", iter))
 
   train <- incl.sample(train)
   train <- build.model(train)
