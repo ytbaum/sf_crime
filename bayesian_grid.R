@@ -172,3 +172,12 @@ bayes.loc.pred <- function(m, x, y)
 
   return(probs)
 }
+
+get.bayes.preds <- function(m, test)
+{
+  pred <- apply(test, 1, function(row) {bayes.loc.pred(m,
+                                                          as.numeric(row["X"]),
+                                                          as.numeric(row["Y"]))})
+
+  return(t(pred))
+}
