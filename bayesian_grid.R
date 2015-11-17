@@ -87,6 +87,8 @@ grid.prob <- function(x, y, grid)
   return(grid[x.bucket, y.bucket])
 }
 
+# get the grid showing probability of a crime happening in a certain grid sector, given that
+# the crime is of the provided category
 get.category.grid <- function(category, data, num.x.buckets = 10, num.y.buckets = num.x.buckets)
 {
   loginfo("in get.category.grid")
