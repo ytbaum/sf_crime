@@ -1,3 +1,6 @@
+require(logging)
+basicConfig()
+
 # helper function to mult.log.loss
 row.log.loss <- function(row)
 {
@@ -129,6 +132,7 @@ get.preds <- function(model, input.data)
 # run one fold of cross-validation
 cv.fold <- function(fold, train)
 {
+  loginfo("in cv.fold")
   train.indices <- fold$train
   test.indices <- fold$test
 
@@ -178,7 +182,6 @@ run.samples <- function(train, num.samples = 10)
 # subm.name: the name of this submission (a short name to describe it)
 generate.subm <- function(train, test, subm.name)
 {
-  require(logging)
 
   init.subm.dir(subm.name)
   addHandler(writeToFile,
