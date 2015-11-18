@@ -112,6 +112,7 @@ get.category.grid <- function(category, data, num.x.buckets = 10, num.y.buckets 
   grid
 }
 
+# get a list of grids, one for each Category
 get.category.grids <- function(data, num.x.buckets = 10, num.y.buckets = num.x.buckets)
 {
   logdebug("get.category.grids")
@@ -123,6 +124,8 @@ get.category.grids <- function(data, num.x.buckets = 10, num.y.buckets = num.x.b
          num.y.buckets = num.y.buckets)
 }
 
+# get raw counts of the number of times each Category appears in the data
+# used in computing a prior distribution for the Bayesian model
 category.raw.cts <- function(data)
 {
   logdebug("category.raw.cts")
@@ -173,6 +176,7 @@ bayes.loc.pred <- function(m, x, y)
   return(probs)
 }
 
+# wrapper to get Bayesian model's predictions for the whole test data set
 get.bayes.preds <- function(m, test)
 {
   pred <- apply(test, 1, function(row) {bayes.loc.pred(m,
