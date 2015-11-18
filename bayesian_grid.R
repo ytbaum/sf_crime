@@ -138,7 +138,8 @@ category.raw.cts <- function(data)
 # get the whole bayesian location model
 bayes.loc.model <- function(data, num.x.buckets = 10, num.y.buckets = num.x.buckets)
 {
-  logdebug("bayes.loc.model")
+  loginfo(paste0("Training Bayesian grid model.  num.x.buckets = ", num.x.buckets,
+                 ", num.y.buckets = ", num.y.buckets, "."))
 
   grids <- get.category.grids(data, num.x.buckets, num.y.buckets)
   master.grid <- get.master.grid(data, num.x.buckets, num.y.buckets)
