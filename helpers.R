@@ -191,16 +191,13 @@ generate.subm <- function(train, test, subm.name)
   loginfo(paste("Current HEAD ref:", get.head.ref()))
   loginfo(paste("Current commit:", get.current.commit()))
 
-  test <- build.model(test, 'test')
-  train <- build.model(train)
-
   train.sample <- incl.sample(train)
   save.sample(train.sample, subm.name)
-  m <- get.model(train.sample)
+  m <- bayes.loc.model(train.sample, 3, 3)
   loginfo("The call used to train the model:")
   loginfo(m$call)
 
-  preds <- as.data.frame(get.preds(m, test))
+  preds <- as.data.frame(get.bayes.preds(m, test))
 
   id.df <- data.frame(Id = test[,"Id"])
 
