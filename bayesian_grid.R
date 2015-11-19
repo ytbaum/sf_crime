@@ -145,7 +145,10 @@ bayes.loc.model <- function(data, num.x.buckets = 10, num.y.buckets = num.x.buck
   master.grid <- get.master.grid(data, num.x.buckets, num.y.buckets)
   prior <- smooth.grid(category.raw.cts(data))
 
-  return(list(grids = grids, master.grid = master.grid, prior = prior))
+  model <- list(grids = grids, master.grid = master.grid, prior = prior)
+  class(model) <- "bgrid"
+
+  return(model)
 }
 
 # get a prediction for a single row using bayesian location model
@@ -178,11 +181,22 @@ bayes.loc.pred <- function(m, x, y)
 }
 
 # wrapper to get Bayesian model's predictions for the whole test data set
-get.bayes.preds <- function(m, test)
+predict.bgrid <- function(model, input.data)
 {
-  pred <- apply(test, 1, function(row) {bayes.loc.pred(m,
+  pred <- apply(input.data, 1, function(row) {bayes.loc.pred(model,
                                                           as.numeric(row["X"]),
                                                           as.numeric(row["Y"]))})
 
   return(t(pred))
+}
+
+describe.bgrid <- function(x)
+{
+  num.x.buckets <- ncol(x$master.grid)
+  num.y.buckets <- nrow(x$master.grid)
+
+  description <- paste0("Bayesian location grid model with ", num.x.buckets,
+                        " x-buckets and ", num.y.buckets, " y-buckets.")
+
+  return(description)
 }

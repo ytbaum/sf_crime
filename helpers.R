@@ -1,3 +1,5 @@
+source("generics.R")
+
 require(logging)
 basicConfig()
 
@@ -120,13 +122,23 @@ get.model <- function(train)
                 data = train,
                 entropy = TRUE)
 
-  return(m)
+
+  output <- list(m = m)
+  class(output) <- "sfc_multinom"
+  return(output)
 }
 
-get.preds <- function(model, input.data)
+describe.sfc_multinom <- function(model)
+{
+  m <- model$m
+  fmla <- as.character(m$call[2])
+  description <- paste0("Multinomial logistic regression model with formula: ", fmla)
+}
+
+predict.sfc_multinom <- function(model, input.data)
 {
   require(nnet)
-  predict(model, newdata = input.data, type = "probs")
+  predict(model$m, newdata = input.data, type = "probs")
 }
 
 # run one fold of cross-validation
@@ -146,7 +158,7 @@ cv.fold <- function(fold, train)
 
   m <- bayes.loc.model(cv.train, 3, 3)
 
-  pred <- get.bayes.preds(m, cv.test)
+  pred <- predict(m, cv.test)
 
   mll <- mult.log.loss(pred, cv.test)
 
@@ -193,11 +205,15 @@ generate.subm <- function(train, test, subm.name)
 
   train.sample <- incl.sample(train)
   save.sample(train.sample, subm.name)
-  m <- bayes.loc.model(train.sample, 3, 3)
-  loginfo("The call used to train the model:")
-  loginfo(m$call)
 
-  preds <- as.data.frame(get.bayes.preds(m, test))
+  train.sample <- build.model(train.sample)
+  test <- build.model(test, 'test')
+
+  model <- get.model(train.sample)
+
+  loginfo(paste0("Description of the model: ", describe(model)))
+
+  preds <- as.data.frame(predict(model, test))
 
   id.df <- data.frame(Id = test[,"Id"])
 
