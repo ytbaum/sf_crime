@@ -111,6 +111,7 @@ create.folds <- function(num.folds, num.rows)
   return(folds)
 }
 
+# returns a trained multinomial regression model
 get.model <- function(train)
 {
   require(nnet)
@@ -168,15 +169,19 @@ cv.fold <- function(fold, train)
 # run cross-validation over a small sample of training data
 run.sample <- function(iter, train)
 {
-  loginfo(paste("Now on sample", iter))
+  num.folds <- 5
+  loginfo(paste0("Running ", num.folds, "-fold cross-validation on sample number ", iter, "..."))
 
   train <- incl.sample(train)
-  train <- build.model(train)
 
-  folds <- create.folds(5, nrow(train))
+  folds <- create.folds(num.folds, nrow(train))
 
   fold.scores <- sapply(folds, cv.fold, train)
   sample.mean <- mean(fold.scores)
+
+  scores.str <- paste0(round(fold.scores, digits = 2), collapse = " ")
+  loginfo(paste0("Scores from the individual folds of cross-validation: ", fold.scores))
+  loginfo(paste0("Average across all folds: ", sample.mean))
 
   return(sample.mean)
 }
@@ -184,6 +189,8 @@ run.sample <- function(iter, train)
 # run cross-validation over multiple samples from training data
 run.samples <- function(train, num.samples = 10)
 {
+  loginfo(paste0("Evaluating model by taking ", num.samples, " samples of training data ",
+                 "and running cross-validation on each sample."))
   sample.scores <- sapply(1:num.samples, run.sample, train)
   return(mean(sample.scores))
 }
