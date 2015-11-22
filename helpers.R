@@ -143,7 +143,7 @@ predict.sfc_multinom <- function(model, input.data)
 }
 
 # run one fold of cross-validation
-cv.fold <- function(fold, train)
+cv.fold <- function(fold, train, model.constructor)
 {
   logdebug("in cv.fold")
   train.indices <- fold$train
@@ -157,7 +157,7 @@ cv.fold <- function(fold, train)
   cv.test.rows <- which(cv.test$Category %in% categories)
   cv.test <- cv.test[cv.test.rows,]
 
-  m <- bayes.loc.model(cv.train, 3, 3)
+  m <- model.constructor(cv.train)
 
   pred <- predict(m, cv.test)
 
@@ -167,7 +167,7 @@ cv.fold <- function(fold, train)
 }
 
 # run cross-validation over a small sample of training data
-run.sample <- function(iter, train)
+run.sample <- function(iter, train, model.constructor)
 {
   num.folds <- 5
   loginfo(paste0("Running ", num.folds, "-fold cross-validation on sample number ", iter, "..."))
@@ -176,7 +176,7 @@ run.sample <- function(iter, train)
 
   folds <- create.folds(num.folds, nrow(train))
 
-  fold.scores <- sapply(folds, cv.fold, train)
+  fold.scores <- sapply(folds, cv.fold, train, model.constructor)
   sample.mean <- mean(fold.scores)
 
   scores.str <- paste0(round(fold.scores, digits = 2), collapse = " ")
@@ -187,11 +187,11 @@ run.sample <- function(iter, train)
 }
 
 # run cross-validation over multiple samples from training data
-run.samples <- function(train, num.samples = 10)
+run.samples <- function(model.constructor, train, num.samples = 10)
 {
   loginfo(paste0("Evaluating model by taking ", num.samples, " samples of training data ",
                  "and running cross-validation on each sample."))
-  sample.scores <- sapply(1:num.samples, run.sample, train)
+  sample.scores <- sapply(1:num.samples, run.sample, train, model.constructor)
   return(mean(sample.scores))
 }
 

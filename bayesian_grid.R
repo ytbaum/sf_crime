@@ -200,3 +200,24 @@ describe.bgrid <- function(x)
 
   return(description)
 }
+
+# helper function for parameter search using cross-validation
+# gets all pairs of num.x.buckets, num.y.buckets parameters up to the max level indicated
+# by the given arguments
+get.bucket.pairs <- function(max.buckets)
+{
+  bucket.pairs <- as.list(as.data.frame(t(permutations(max.buckets, 2, repeats.allowed = TRUE))))
+  names(bucket.pairs) <- sapply(bucket.pairs, paste, collapse = " ")
+
+  return(bucket.pairs)
+}
+
+# a helper function which returns a bgrid constructor function
+# params: a vector of length two: the first element is the number of x buckets,
+# the second is the number of y buckets
+get.constructor <- function(params)
+{
+  num.x.buckets <- params[1]
+  num.y.buckets <- params[2]
+  function(data) bayes.loc.model(data, num.x.buckets, num.y.buckets)
+}
