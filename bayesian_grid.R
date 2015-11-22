@@ -190,6 +190,8 @@ predict.bgrid <- function(model, input.data)
   return(t(pred))
 }
 
+# function to print a pretty description of this model
+# called as part of the generic function "describe"
 describe.bgrid <- function(x)
 {
   num.x.buckets <- ncol(x$master.grid)
